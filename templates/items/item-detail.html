@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Buy {{ item.name }}{% endblock %}
+
+{% block extra_head %}
+    <script src="https://js.stripe.com/v3/"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="item-card">
+        <h1>{{ item.name }}</h1>
+        <p>{{ item.description }}</p>
+        <p class="price">${{ item.price }}</p>
+
+        <button id="buy-button" class="buy-button">Buy Now</button>
+
+        <div id="error-message" class="error" style="display: none;"></div>
+        <div id="loading-message" class="success" style="display: none;">Processing...</div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript">
+        var stripe = Stripe('{{ stripe_publishable_key }}');
+        var buyButton = document.getElementById('buy-button');
+        var errorMessage = document.getElementById('error-message');
+        var loadingMessage = document.getElementById('loading-message');
+
+        buyButton.addEventListener('click', function () {
+            // Disable button and show loading
+            buyButton.disabled = true;
+            loadingMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+
+            // Create a new Checkout Session using the server-side endpoint
+            fetch('/buy/{{ item.id }}/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (session) {
+                    if (session.error) {
+                        throw new Error(session.error);
+                    }
+                    // Redirect to Stripe Session Checkout
+                    return stripe.redirectToCheckout({sessionId: session.id});
+                })
+                .then(function (result) {
+                    if (result.error) {
+                        throw new Error(result.error.message);
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error:', error);
+                    errorMessage.textContent = 'Error: ' + error.message;
+                    errorMessage.style.display = 'block';
+                    loadingMessage.style.display = 'none';
+                    buyButton.disabled = false;
+                });
+        });
+    </script>
+{% endblock %}
