@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{#<body style="font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px;">#}
+<p>This is a demo Django + Stripe integration.</p>
+<h2>Available endpoints:</h2>
+<ul>
+    <li><a href="/admin/">Admin Panel</a> - Manage items</li>
+    <li><code>item/{id}/</code> - View item and buy</li>
+    <li><code>buy/{id}/</code> - Get Stripe session (API)</li>
+</ul>
+<p><strong>Example:</strong><br>
+{% for i in items %}
+    <a href="/item/{{ i.id }}/">View Item #{{ i.if }}</a> (if it exists) <br>
+{% endfor %}
+</p>
+{% endblock %}

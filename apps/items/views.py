@@ -1,13 +1,23 @@
 import stripe
+
 from django.conf import settings
+from django.shortcuts import render
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_http_methods
 
-from .models import Item
+from apps.items.models import Item
 
 # Set Stripe API key
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+def home_view(request):
+    """
+    Simple home page that redirects to admin or shows a basic page
+    """
+    context = Item.objects.all()
+    return render(request, 'home.html', context={'items': context})
 
 
 @require_http_methods(["GET"])
@@ -62,10 +72,14 @@ def create_checkout_session(request, item_id):
 
 
 def success_view(request):
-    """Success page after payment"""
+    """
+    Success page after payment
+    """
     return render(request, 'items/success.html')
 
 
 def cancel_view(request):
-    """Cancel page if payment is cancelled"""
+    """
+    Cancel page if payment is cancelled
+    """
     return render(request, 'items/cancel.html')
